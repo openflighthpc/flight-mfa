@@ -1,0 +1,60 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2020-present Alces Flight Ltd.
+#
+# This file is part of Flight MFA.
+#
+# This program and the accompanying materials are made available under
+# the terms of the Eclipse Public License 2.0 which is available at
+# <https://www.eclipse.org/legal/epl-2.0>, or alternative license
+# terms made available by Alces Flight Ltd - please direct inquiries
+# about licensing to licensing@alces-flight.com.
+#
+# Flight MFA is distributed in the hope that it will be useful, but
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
+# IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
+# OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
+# PARTICULAR PURPOSE. See the Eclipse Public License 2.0 for more
+# details.
+#
+# You should have received a copy of the Eclipse Public License 2.0
+# along with Flight MFA. If not, see:
+#
+#  https://opensource.org/licenses/EPL-2.0
+#
+# For more information on Flight MFA, please visit:
+# https://github.com/openflighthpc/flight-mfa
+#==============================================================================
+
+_flightmfa_main() {
+  case $1 in
+    generate)
+      shift
+      ${_flightmfa_ROOT}/libexec/actions/generate "$@"
+      ;;
+    show)
+      shift
+      ${_flightmfa_ROOT}/libexec/actions/show "$@"
+      ;;
+    *)
+      binname="${FLIGHT_PROGRAM_NAME:-mfa}"
+      cat <<EOF
+Usage: $binname COMMAND [[OPTION]... [ARGS]]
+Manage multi-factor authentication configuration
+
+Commands:
+EOF
+      printf "  %-22s  %s\n" "$binname generate" "Generate a MFA code."
+      printf "  %-22s  %s\n" "$binname show" "Show existing MFA code."
+      cat <<EOF
+
+Please report bugs to <flight@openflighthpc.org>
+OpenFlight home page: <https://openflighthpc.org/>
+EOF
+      ;;
+  esac
+}
+
+_flightmfa_ROOT=${FLIGHTMFA_ROOT:-$(cd $(dirname ${BASH_SOURCE[0]})/.. && pwd)}
+_flightmfa_main "$@"
+unset _flightmfa_main _flightmfa_ROOT
