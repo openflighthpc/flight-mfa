@@ -71,11 +71,27 @@ fi
 
 _flightmfa_SECRETFILE="${HOME}/${flight_MFA_secretfile:-.config/flight/mfa.dat}"
 
+flight_MFA_engine=${flight_MFA_engine:-googleauthenticator}
+
+_uri_googleauthenticator() {
+    echo "otpauth://totp/${flight_MFA_service}?secret=${_flightmfa_KEY}&issuer=${flight_MFA_issuer}"
+}
+
+_uri_ipa() {
+    local _uri
+    _uri=$(grep "^\" URI " "${_flightmfa_SECRETFILE}" | awk 'BEGIN { ORS=" " }; {print $3}')
+    if [ -z "$_uri" ]; then
+	echo "otpauth://totp/${flight_MFA_service}?secret=${_flightmfa_KEY}&issuer=${flight_MFA_issuer}"
+    else
+	echo "${_uri}"
+    fi
+}
+
 if [ ! -e "${_flightmfa_SECRETFILE}" ]; then
     echo "${FLIGHT_PROGRAM_NAME:-mfa}: not generated; generate with 'generate'"
     exit 1			       
 else
-    _flightmfa_KEY="$(head -n 1 ${_flightmfa_SECRETFILE})"
+    _flightmfa_KEY="$(head -n 1 "${_flightmfa_SECRETFILE}")"
     if [ "$(tput cols)" -lt 90 ]; then
 	if [ "$(tput cols)" -lt 78 ]; then
 	    echo "WARNING: unable to display QR code (insufficient terminal width)."
@@ -86,7 +102,7 @@ else
 	fi
     fi
     qrencode -o - \
-	-t ansi "otpauth://totp/${flight_MFA_service}?secret=${_flightmfa_KEY}&issuer=${flight_MFA_issuer}" \
+	-t ANSIUTF8 "$(_uri_${flight_MFA_engine})" \
 	-m "${_flightmfa_MARGIN:-4}"
     echo "Or use key: ${_flightmfa_KEY}"
 fi
